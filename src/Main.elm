@@ -16,9 +16,9 @@ module Main exposing (Msg(..), main, update, view)
 import Browser
 import Debug
 import Html exposing (Html, button, div, input, text)
-import Html.Attributes exposing (class, disabled, type_, value)
+import Html.Attributes exposing (class, type_, value)
 import Html.Events exposing (onClick, onInput)
-import List.Extra as ListE
+import Table exposing (Table)
 
 
 
@@ -37,7 +37,19 @@ main =
 type alias Model =
     { addIngredient : Ingredient
     , ingredients : List Ingredient
+    , acquiredIngredients : Table
     }
+
+
+
+-- type alias AcquiredIngredient r =
+--     { r
+--         | name : List String
+--         , price : List Float
+--         , amount : List String
+--     }
+-- alterAcquiredIngredientName idx value ingredient =
+--     { ingredient | acquiredIngredientNames }
 
 
 init : flags -> ( Model, Cmd Msg )
@@ -48,6 +60,12 @@ init _ =
             [ { name = "spinach", quantity = Weight "16oz", expiration = "5/17" }
             , { name = "eggs", quantity = Count 9, expiration = "6/22" }
             ]
+      , acquiredIngredients =
+            Table.createTable "Acquired Ingredients"
+                { alterable = True }
+                [ Table.createColumn "name" Table.expectString
+                , Table.createColumn "price" Table.expectFloat
+                ]
       }
     , Cmd.none
     )
@@ -55,7 +73,7 @@ init _ =
 
 initD : Model
 initD =
-    init 0 |> Tuple.first
+    init {} |> Tuple.first
 
 
 type alias Ingredient =
@@ -65,28 +83,25 @@ type alias Ingredient =
     }
 
 
-{-| Stock ingredients are what we have at the house, but Recipe Ingredients are the more "abstract"
-ingredient that is found in a recipe. From these "abstract" entitites, we pull from ingredients that
-we have in stock to determine how much you already have, and what's missing.
--}
-type alias RecipeIngredient =
-    { name : String, quantity : Quantity }
 
-
-type alias Recipe =
-    { name : String, ingredients : List RecipeIngredient }
-
-
-{-| Ingredients are uniquely identified by combination of their name and expiration.
--}
-ingredientId :
-    { a
-        | name : String
-        , expiration : String
-    }
-    -> ( String, String )
-ingredientId ingredient =
-    ( ingredient.name, ingredient.expiration )
+-- {-| Stock ingredients are what we have at the house, but Recipe Ingredients are the more "abstract"
+-- ingredient that is found in a recipe. From these "abstract" entitites, we pull from ingredients that
+-- we have in stock to determine how much you already have, and what's missing.
+-- -}
+-- type alias RecipeIngredient =
+--     { name : String, quantity : Quantity }
+-- type alias Recipe =
+--     { name : String, ingredients : List RecipeIngredient }
+-- {-| Ingredients are uniquely identified by combination of their name and expiration.
+-- -}
+-- ingredientId :
+--     { a
+--         | name : String
+--         , expiration : String
+--     }
+--     -> ( String, String )
+-- ingredientId ingredient =
+--     ( ingredient.name, ingredient.expiration )
 
 
 {-| Quantities are funny things, with Eggs we'll want to count the number of eggs, but with arugula
@@ -110,6 +125,7 @@ setQuantity q i =
 
 type Msg
     = NoOp
+    | UpdateAcquiredIngredients Table.Msg
     | AddIngredient
     | AddIngredientQuantityIsCount
     | AddIngredientQuantityIsWeight
@@ -125,6 +141,9 @@ update msg model =
         (case Debug.log "message" msg of
             NoOp ->
                 model
+
+            UpdateAcquiredIngredients tableMsg ->
+                { model | acquiredIngredients = Table.update tableMsg model.acquiredIngredients }
 
             AddIngredient ->
                 { model
@@ -180,6 +199,7 @@ view model =
         [ class "app" ]
         [ addIngredients model.addIngredient
         , ingredientsList model.ingredients
+        , Html.map UpdateAcquiredIngredients <| Table.viewTable model.acquiredIngredients
         ]
 
 
