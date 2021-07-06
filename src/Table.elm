@@ -177,7 +177,7 @@ viewTable table =
 viewColumn : Table -> Int -> TableColumn -> Html Msg
 viewColumn table columnIndex column =
     div [ class "column" ] <|
-        (input [ disabled True, value column.name ] []
+        (div [ class "name" ] [ input [ disabled True, value column.name ] [] ]
             :: (if table.alterable /= Nothing then
                     [ viewInsertableValue table column.columnType columnIndex ]
 
