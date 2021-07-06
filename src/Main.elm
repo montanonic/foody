@@ -18,7 +18,7 @@ import Debug
 import Html exposing (Html, button, div, input, text)
 import Html.Attributes exposing (class, type_, value)
 import Html.Events exposing (onClick, onInput)
-import Table exposing (Table)
+import Table exposing (ColumnValue(..), Table)
 
 
 
@@ -197,10 +197,13 @@ view : Model -> Html Msg
 view model =
     div
         [ class "app" ]
-        [ addIngredients model.addIngredient
-        , ingredientsList model.ingredients
-        , Html.map UpdateAcquiredIngredients <| Table.viewTable model.acquiredIngredients
-        ]
+        [ Html.map UpdateAcquiredIngredients <| Table.viewTable model.acquiredIngredients ]
+
+
+
+-- [ addIngredients model.addIngredient
+-- , ingredientsList model.ingredients
+-- ]
 
 
 addIngredients : Ingredient -> Html Msg

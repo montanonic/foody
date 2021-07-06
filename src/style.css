@@ -3,7 +3,7 @@ html, body, * {
 }
 
 html {
-    background-color: rgb(20, 20, 20);
+    background-color: rgb(151, 172, 185);
 }
 
 /* Do a reset of default body settings. */
@@ -14,7 +14,7 @@ body {
 }
 
 :root {
-    --text-color: rgb(241, 246, 247);
+    --text-color: rgb(10, 37, 43);
 }
 
 .app {
@@ -35,10 +35,14 @@ body {
     border: 1px solid rgb(146, 146, 146);
 }
 
-.table .column .name input {
+.table .column .name input, .table .column .name input:disabled  {
     color: rgb(0, 0, 0);
     background-color: rgb(143, 167, 212);
     height: 26px;
+}
+
+.table .column input:disabled {
+    background-color: rgb(143, 211, 207);
 }
 
 .table .columns {

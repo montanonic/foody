@@ -1,4 +1,4 @@
-module Table exposing (Msg, Table, TableColumn, createColumn, createTable, expectFloat, expectString, update, viewTable)
+module Table exposing (ColumnValue(..), Msg, Table, TableColumn, createColumn, createTable, expectFloat, expectString, update, viewTable)
 
 import Html exposing (Html, button, div, input, text)
 import Html.Attributes exposing (class, disabled, step, type_, value)
