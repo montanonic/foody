@@ -176,13 +176,14 @@ viewTable table =
 
 viewColumn : Table -> Int -> TableColumn -> Html Msg
 viewColumn table columnIndex column =
-    div [ class "column" ]
-        ((if table.alterable /= Nothing then
-            [ viewInsertableValue table column.columnType columnIndex ]
+    div [ class "column" ] <|
+        (input [ disabled True, value column.name ] []
+            :: (if table.alterable /= Nothing then
+                    [ viewInsertableValue table column.columnType columnIndex ]
 
-          else
-            []
-         )
+                else
+                    []
+               )
             ++ (column
                     |> getColumnValues
                     |> List.indexedMap (viewColumnValue table column.name)
@@ -199,7 +200,7 @@ viewColumnValue table columnName index columnValue =
         onInputHandler =
             AlterValue columnName index columnValue
     in
-    viewValue table columnValue stringValue onInputHandler
+    div [ class "value" ] [ viewValue table columnValue stringValue onInputHandler ]
 
 
 {-| For alterable tables, this is the field that you can insert with.
@@ -213,7 +214,8 @@ viewInsertableValue table expectedType columnIndex =
         onInputHandler =
             AlterInsertionField columnIndex
     in
-    viewValue table expectedType stringValue onInputHandler
+    div [ class "value", class "insertable" ]
+        [ viewValue table expectedType stringValue onInputHandler ]
 
 
 {-| Generic rendering of a value cell in table.
@@ -229,13 +231,10 @@ viewValue table expectedType stringValue onInputHandler =
                  ]
                     ++ attrs
                 )
-
-        valueInput =
-            case expectedType of
-                String _ ->
-                    commonInput [] []
-
-                Float _ ->
-                    commonInput [ type_ "number", step "0.01" ] []
     in
-    div [ class "value" ] [ valueInput ]
+    case expectedType of
+        String _ ->
+            commonInput [] []
+
+        Float _ ->
+            commonInput [ type_ "number", step "0.01" ] []

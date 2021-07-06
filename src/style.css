@@ -30,6 +30,20 @@ body {
 
 /* Table Styling */
 
+.table input:not(:disabled) {
+    box-shadow: none;
+    border: 1px solid rgb(146, 146, 146);
+}
+
+.table input:disabled {
+    border: -internal-light-dark(rgba(239, 239, 239, 0.3), rgba(59, 59, 59, 0.3));;
+}
+
 .table .columns {
     display: flex;
+}
+
+.value.insertable input {
+    background-color: rgb(191, 201, 202);
+    height: 26px;
 }
