@@ -11,7 +11,7 @@
 -}
 
 
-module Main exposing (Msg(..), main, update, view)
+port module Main exposing (Msg(..), main, update, view)
 
 import Browser
 import Debug
@@ -28,6 +28,15 @@ import Table exposing (ColumnValue(..), Table)
 main : Program () Model Msg
 main =
     Browser.document { init = init, update = update, view = viewToDocument view, subscriptions = \_ -> Sub.none }
+
+
+
+-- PORTS
+
+
+{-| Use `persistAlteredFields` to prepare the data.
+-}
+port locallyStoreAlteredFields : List ( Table.AlteredField, String ) -> Cmd msg
 
 
 
@@ -135,42 +144,47 @@ type Msg
     | AddIngredientExpirationChange String
 
 
-update : Msg -> Model -> ( Model, Cmd msg )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( Debug.log "model update"
-        (case Debug.log "message" msg of
-            NoOp ->
-                model
+    case Debug.log "message" msg of
+        NoOp ->
+            pure model
 
-            UpdateAcquiredIngredients tableMsg ->
-                { model | acquiredIngredients = Table.update tableMsg model.acquiredIngredients }
+        UpdateAcquiredIngredients tableMsg ->
+            Table.updateWithEffects locallyStoreAlteredFields tableMsg model.acquiredIngredients
+                |> Tuple.mapFirst (\newTable -> { model | acquiredIngredients = newTable })
 
-            AddIngredient ->
+        AddIngredient ->
+            pure
                 { model
                     | ingredients = model.addIngredient :: model.ingredients
                     , addIngredient = initD.addIngredient
                 }
 
-            AddIngredientQuantityIsCount ->
-                updateAddIngredient (setQuantity (Count 0)) model
+        AddIngredientQuantityIsCount ->
+            pure <| updateAddIngredient (setQuantity (Count 0)) model
 
-            AddIngredientQuantityIsWeight ->
-                updateAddIngredient (setQuantity (Weight "")) model
+        AddIngredientQuantityIsWeight ->
+            pure <| updateAddIngredient (setQuantity (Weight "")) model
 
-            AddIngredientNameChange s ->
-                updateAddIngredient (\i -> { i | name = s }) model
+        AddIngredientNameChange s ->
+            pure <| updateAddIngredient (\i -> { i | name = s }) model
 
-            AddIngredientCountChange n ->
-                updateAddIngredient (setQuantity (Count n)) model
+        AddIngredientCountChange n ->
+            pure <| updateAddIngredient (setQuantity (Count n)) model
 
-            AddIngredientWeightChange s ->
-                updateAddIngredient (setQuantity (Weight s)) model
+        AddIngredientWeightChange s ->
+            pure <| updateAddIngredient (setQuantity (Weight s)) model
 
-            AddIngredientExpirationChange s ->
-                updateAddIngredient (\i -> { i | expiration = s }) model
-        )
-    , Cmd.none
-    )
+        AddIngredientExpirationChange s ->
+            pure <| updateAddIngredient (\i -> { i | expiration = s }) model
+
+
+{-| Indicates a pure model update
+-}
+pure : Model -> ( Model, Cmd Msg )
+pure model =
+    ( Debug.log "model update" model, Cmd.none )
 
 
 updateAddIngredient : (Ingredient -> Ingredient) -> Model -> Model

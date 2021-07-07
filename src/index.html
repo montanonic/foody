@@ -14,6 +14,44 @@
         var app = Elm.Main.init({
             node: document.getElementById("elm")
         });
+
+        app.ports.locallyStoreAlteredFields.subscribe(function (alteredFields) {
+            // console.log('locally storing altered field', alteredField);
+
+
+            for (let [{ tableName, columnIndex, columnName, insertion }, newValue] of alteredFields) {
+                const key = index => `{${tableName}-${columnName}-${index}}`;
+                if (insertion) {
+                    // For insertion and updating *all* the keys we'll need to know which
+                    // columnIndex to stop at; one simple method is just stop once the lookup value
+                    // is undefined.
+                    //
+                    // P.S. There's a chrome.storage API that's async and which allows direct object
+                    // storage. This might be worth creating a conditional branch to optimize for on
+                    // chromium browsers.
+                    //
+                    // Code info: this whole loop is just to push the indices of the previous column
+                    // entries up by one to make space for the new inserted entries. Since at time
+                    // of insertion, localstorage has not been altered, we start at 0-index and move
+                    // it to 1, and so on for each value. Currently we're checking for null, but
+                    // this is bad practice: what we need to know is the new table length, as that's
+                    // the only reliable way to know when to stop.
+                    let count = 0;
+                    let current = localStorage.getItem(key(count));
+                    while (current !== null || count >= 10_000) { // count >= 10_000 is just a failsafe.
+                        const next = localStorage.getItem(key(count + 1));
+                        localStorage.setItem(key(count + 1), current);
+                        current = next;
+                        count++;
+                    }
+                    // This should always set to index 0 unless there's a bug.
+                    localStorage.setItem(key(columnIndex), newValue)
+                } else {
+                    localStorage.setItem(key(columnIndex), newValue);
+                }
+            }
+
+        });
     </script>
 </body>
 
