@@ -1,16 +1,3 @@
-{-
-   Okay so my main goal, since I don't have pencil and paper, is to build up feature-by-feature into more complex parsing. We'll start with simple calculator arithmetic, and elaborate more deeply.
-
-   So, initial goals:
-
-   parse "3 + 7", and also with -, *, /
-   parse the same, but with larger numbers
-   parse the same, but with negative numbers
-
-   Do all of this with a char-by-char UI? At least to get a feel for what that's like before discounting its power just because the elm parsing model already provides utilities for operating on larger chunks all at once.
--}
-
-
 port module Main exposing (Msg(..), main, update, view)
 
 import Browser
